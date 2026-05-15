@@ -8,7 +8,7 @@ description: >
 
 # English Learning Setup
 
-One-time setup that creates the Notion database and saves the config for future sessions.
+One-time setup that connects to a Notion database and saves the config for future sessions.
 
 ## Step 1 — Check existing config
 
@@ -21,20 +21,40 @@ Run setup again to replace it.
 ```
 Then ask if they want to continue. If no, stop.
 
-## Step 2 — Ask where to create the database
+## Step 2 — Ask if user has an existing database
 
-Ask the user to provide a Notion page ID or URL where the database should be created.
+Ask the user:
 
 ```
-Please provide the Notion page where you'd like to create your English Learning database.
-You can paste the page URL or page ID.
+Do you already have an English Learning database in Notion?
+• Yes — paste your existing database URL or ID
+• No — I'll create one for you
 ```
 
-Extract the page ID from the URL if needed (the 32-character string after the last `-` or `/`).
+### If Yes (existing DB)
+
+Extract the database ID from the URL or use the provided ID directly (the 32-character string after the last `-` or `/`).
+
+Skip to Step 4.
+
+### If No (create new DB)
+
+Proceed to Step 3.
 
 ## Step 3 — Create the Notion database
 
-Use Notion MCP to create a new database inside the specified page with exactly these properties:
+Ask the user:
+
+```
+Where and what should I name your Notion database?
+Default: workspace root, named "English Learning DB" — or tell me a custom location (page URL / page ID) and/or a custom name.
+```
+
+Use the defaults for anything the user doesn't specify.
+
+If the user provides a page URL or ID, extract the page ID (the 32-character string after the last `-` or `/`) and use it as the parent page.
+
+Use Notion MCP to create a new database with exactly these properties:
 
 | Property | Type | Options |
 |---|---|---|
@@ -46,11 +66,11 @@ Use Notion MCP to create a new database inside the specified page with exactly t
 | Familiarity | select | low, medium, high |
 | Date | date | — |
 
-Database title: `English Learning`
+Database title: user-provided name, or `English Learning DB` if not specified.
 
 ## Step 4 — Save config
 
-After the database is created, save the returned database ID as plain text to `${CLAUDE_PLUGIN_DATA}/config`.
+Save the database ID as plain text to `${CLAUDE_PLUGIN_DATA}/config`.
 
 The file should contain only the database ID, nothing else. Use the Write tool to create this file.
 
@@ -59,8 +79,7 @@ The file should contain only the database ID, nothing else. Use the Write tool t
 ```
 ✅ Setup complete!
 
-Your English Learning database has been created in Notion.
-DB ID saved to config — all future sessions will connect to this database automatically.
+Notion DB ID saved to config — all future sessions will connect to this database automatically.
 
 You can now:
 • Say "add [word] to learning list" to collect words
