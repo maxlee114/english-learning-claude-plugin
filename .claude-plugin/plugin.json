@@ -1,0 +1,9 @@
+{
+  "name": "english-learning",
+  "version": "1.0.0",
+  "description": "English vocabulary learning tools — save word lists to Notion and generate practice articles from saved words",
+  "author": {
+    "name": "Chengche Lee",
+    "email": "maxlee114@gmail.com"
+  }
+}

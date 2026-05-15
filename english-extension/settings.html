@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>English Learning Helper</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 320px;
+      background: #111111;
+      color: #e0e0e0;
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 20px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+
+    .logo {
+      width: 34px;
+      height: 34px;
+      background: #e0e0e0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .header-text h1 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.2px;
+    }
+
+    .header-text p {
+      font-size: 11px;
+      color: #555555;
+    }
+
+    .section { margin-bottom: 20px; }
+
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #444444;
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: #888888;
+      margin-bottom: 5px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 9px 12px;
+      background: #1c1c1c;
+      border: 1px solid #2e2e2e;
+      border-radius: 7px;
+      color: #e0e0e0;
+      font-size: 12px;
+      margin-bottom: 12px;
+      transition: border-color 0.2s;
+      outline: none;
+      appearance: none;
+    }
+
+    input { font-family: 'SF Mono', monospace; }
+
+    select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23555555' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 30px;
+    }
+
+    select option { background: #1c1c1c; }
+
+    input:focus, select:focus { border-color: #666666; }
+    input::placeholder { color: #333333; }
+
+    .hint {
+      font-size: 11px;
+      color: #444444;
+      margin-top: -8px;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .hint a { color: #888888; text-decoration: none; }
+    .hint a:hover { color: #bbbbbb; }
+
+    .save-btn {
+      width: 100%;
+      padding: 10px;
+      background: #e0e0e0;
+      color: #111111;
+      border: none;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.2px;
+      transition: background 0.2s;
+    }
+
+    .save-btn:hover { background: #ffffff; }
+
+    .status {
+      text-align: center;
+      font-size: 12px;
+      margin-top: 10px;
+      height: 16px;
+      color: #888888;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #2a2a2a;
+      margin: 20px 0;
+    }
+
+    .notion-db-hint {
+      font-size: 11px;
+      color: #444444;
+      line-height: 1.6;
+      background: #1c1c1c;
+      border-radius: 7px;
+      padding: 10px 12px;
+      border: 1px solid #2e2e2e;
+    }
+
+    .notion-db-hint code {
+      color: #aaaaaa;
+      font-family: monospace;
+      font-size: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">📚</div>
+    <div class="header-text">
+      <h1>English Learning Helper</h1>
+      <p>Settings & API Keys</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">OpenAI</div>
+    <label>API Key</label>
+    <input type="password" id="openaiKey" placeholder="sk-..." />
+    <p class="hint">Get your key at <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a></p>
+
+    <label>Model</label>
+    <select id="openaiModel">
+      <option value="gpt-4o-mini">gpt-4o-mini (fast & cheap)</option>
+      <option value="gpt-4o">gpt-4o (smarter)</option>
+      <option value="gpt-4-turbo">gpt-4-turbo</option>
+      <option value="gpt-3.5-turbo">gpt-3.5-turbo (cheapest)</option>
+    </select>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section">
+    <div class="section-title">Notion</div>
+    <label>Integration Token</label>
+    <input type="password" id="notionKey" placeholder="secret_..." />
+    <p class="hint">Create at <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a></p>
+
+    <label>Database ID</label>
+    <input type="text" id="notionDbId" placeholder="36f4c6a3..." />
+    <div class="notion-db-hint">
+      Copy from your DB URL:<br>
+      <code>notion.so/<b>36f4c6a31aab4d5b...</b>?v=...</code>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <button class="save-btn" id="saveBtn">Save Settings</button>
+  <div class="status" id="status"></div>
+
+  <script src="settings.js"></script>
+</body>
+</html>
