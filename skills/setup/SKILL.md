@@ -12,9 +12,9 @@ One-time setup that creates the Notion database and saves the config for future 
 
 ## Step 1 — Check existing config
 
-Check if `${CLAUDE_PLUGIN_DATA}/config.json` already exists using the Read tool.
+Check if `${CLAUDE_PLUGIN_DATA}/config` already exists using the Read tool.
 
-If it exists and contains a valid `notion_db_id`, tell the user:
+If it exists and contains a DB ID, tell the user:
 ```
 Setup already complete. Notion DB ID: <id>
 Run setup again to replace it.
@@ -50,15 +50,9 @@ Database title: `English Learning`
 
 ## Step 4 — Save config
 
-After the database is created, save the returned database ID to `${CLAUDE_PLUGIN_DATA}/config.json`:
+After the database is created, save the returned database ID as plain text to `${CLAUDE_PLUGIN_DATA}/config`.
 
-```json
-{
-  "notion_db_id": "<returned-database-id>"
-}
-```
-
-Use the Write tool to create this file.
+The file should contain only the database ID, nothing else. Use the Write tool to create this file.
 
 ## Step 5 — Confirm
 
