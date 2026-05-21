@@ -1,0 +1,27 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "maxlee114-plugins",
+  "description": "Claude Code plugins by Chengche Lee",
+  "owner": {
+    "name": "Chengche Lee",
+    "email": "maxlee114@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "english-learning",
+      "description": "English vocabulary learning tools — save word lists to Notion and generate practice articles from saved words",
+      "author": {
+        "name": "Chengche Lee"
+      },
+      "category": "productivity",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/maxlee114/english-learning-claude-plugin.git",
+        "path": "plugins/english-learning",
+        "ref": "main",
+        "sha": "4adab8cfe094d762d2968dcbbcdb145785813e82"
+      },
+      "homepage": "https://github.com/maxlee114/english-learning-claude-plugin"
+    }
+  ]
+}
