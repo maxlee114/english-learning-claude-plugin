@@ -30,7 +30,7 @@ async function handleTranslate(text) {
 {
   "word": "the word/phrase",
   "type": "vocab" or "grammar",
-  "definition": "clear, simple definition in English (1-2 sentences)",
+  "definition": "clear, simple definition in English (keep it brief)",
   "example": "a natural example sentence using the word",
   "chinese": "Traditional Chinese translation"
 }
