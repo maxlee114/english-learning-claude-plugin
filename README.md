@@ -20,7 +20,8 @@ A Claude Code plugin for English vocabulary learning. Collect words during conve
 ## Install
 
 ```bash
-claude plugin install --plugin-url https://github.com/maxlee114/english-learning-claude-plugin
+claude plugin marketplace add maxlee114/english-learning-claude-plugin
+claude plugin install english-learning
 ```
 
 Then restart Claude Code and run the one-time setup:
