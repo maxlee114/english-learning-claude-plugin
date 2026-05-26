@@ -93,8 +93,7 @@ function updatePopup(data) {
 
   popup.innerHTML = `
     <div class="el-word">${data.word}</div>
-    <div class="el-chinese">${data.chinese || ''}</div>
-    <div class="el-type-badge">${data.type}</div>
+    <div class="el-chinese">${data.chinese || ''}${data.pos ? ` · ${data.pos}` : ''}</div>
     <div class="el-definition">${data.definition}</div>
     <div class="el-example">"${data.example}"</div>
     <button class="el-save-btn" id="el-save">
@@ -111,7 +110,7 @@ function updatePopup(data) {
     try {
       const res = await chrome.runtime.sendMessage({
         action: 'saveToNotion',
-        data: data
+        data: { ...data, pageUrl: window.location.href, pageTitle: document.title }
       });
       if (res.success) {
         btn.innerHTML = '✓ Saved!';

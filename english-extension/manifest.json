@@ -23,6 +23,6 @@
     }
   ],
   "action": {
-    "default_popup": "settings.html"
+    "default_popup": "popup.html"
   }
 }
