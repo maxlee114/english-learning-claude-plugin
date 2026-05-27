@@ -110,10 +110,10 @@ saveBtn.addEventListener('click', () => {
     if (dbChanged) data.schemaVersion = 1;
 
     chrome.storage.sync.set(data, () => {
-      const msg = dbChanged
-        ? '✓ Settings saved! DB changed — migration will run on next action.'
-        : '✓ Settings saved!';
-      showStatus(status, msg, 'success');
+      showStatus(status, '✓ Settings saved!', 'success');
+      if (data.notionKey && data.notionDbId) {
+        chrome.runtime.sendMessage({ action: 'runMigrations' });
+      }
     });
   });
 });

@@ -29,6 +29,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse(SCHEMA_VERSION);
     return true;
   }
+  if (message.action === 'runMigrations') {
+    runMigrations().then(() => sendResponse({ success: true })).catch(e => sendResponse({ success: false, error: e.message }));
+    return true;
+  }
   if (message.action === 'getMigrationLogs') {
     chrome.storage.local.get(['migrationLogs'], ({ migrationLogs = [] }) => {
       sendResponse(migrationLogs);
