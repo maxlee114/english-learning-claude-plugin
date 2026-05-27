@@ -92,8 +92,16 @@ function updatePopup(data) {
   }
 
   popup.innerHTML = `
-    <div class="el-word">${data.word}</div>
-    <div class="el-chinese">${data.chinese || ''}${data.pos ? ` · ${data.pos}` : ''}</div>
+    <div class="el-word-row">
+      <span class="el-word">${data.word}</span>
+      ${data.pos ? `<span class="el-pos">${data.pos}</span>` : ''}
+      ${data.chinese ? `
+        <span class="el-chinese-hint" id="el-chinese-hint" title="Show Chinese">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </span>
+        <span class="el-chinese" id="el-chinese" style="display:none">${data.chinese}</span>
+      ` : ''}
+    </div>
     <div class="el-definition">${data.definition}</div>
     <div class="el-example">"${data.example}"</div>
     <button class="el-save-btn" id="el-save">
@@ -101,6 +109,11 @@ function updatePopup(data) {
       Save to Notion
     </button>
   `;
+
+  document.getElementById('el-chinese-hint')?.addEventListener('click', () => {
+    document.getElementById('el-chinese-hint').style.display = 'none';
+    document.getElementById('el-chinese').style.display = 'inline';
+  });
 
   document.getElementById('el-save').addEventListener('click', async () => {
     const btn = document.getElementById('el-save');
@@ -116,6 +129,9 @@ function updatePopup(data) {
         btn.innerHTML = '✓ Saved!';
         btn.classList.add('el-saved');
         setTimeout(removePopup, 1200);
+      } else if (res.duplicate) {
+        btn.textContent = '已存在';
+        btn.disabled = false;
       } else {
         btn.textContent = 'Failed — check Settings';
         btn.disabled = false;

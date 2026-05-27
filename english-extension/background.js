@@ -1,3 +1,8 @@
+importScripts('schema.js');
+
+// Run migrations on service worker startup
+runMigrations().catch(console.error);
+
 // Open side panel when extension icon is clicked
 chrome.action.onClicked.addListener((tab) => {
   chrome.sidePanel.open({ windowId: tab.windowId });
@@ -14,6 +19,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   if (message.action === 'getPageWords') {
     handleGetPageWords(message.pageUrl).then(sendResponse);
+    return true;
+  }
+  if (message.action === 'setup') {
+    handleSetup(message.data).then(sendResponse);
+    return true;
+  }
+  if (message.action === 'getSchemaVersion') {
+    sendResponse(SCHEMA_VERSION);
+    return true;
+  }
+  if (message.action === 'getMigrationLogs') {
+    chrome.storage.local.get(['migrationLogs'], ({ migrationLogs = [] }) => {
+      sendResponse(migrationLogs);
+    });
     return true;
   }
 });
@@ -94,7 +113,8 @@ async function handleSaveToNotion(data) {
             parent: { database_id: notionArticlesDbId },
             properties: {
               'Title': { title: [{ text: { content: data.pageTitle || data.pageUrl } }] },
-              'URL': { url: data.pageUrl }
+              'URL': { url: data.pageUrl },
+              'Date': { date: { start: today } }
             }
           })
         });
@@ -103,6 +123,30 @@ async function handleSaveToNotion(data) {
       }
     } catch (e) {
       console.error('[EL] Article link failed:', e);
+    }
+  }
+
+  // Check for duplicate word within the same article
+  if (articlePageId) {
+    try {
+      const dupRes = await fetch(`https://api.notion.com/v1/databases/${notionDbId}/query`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          filter: {
+            and: [
+              { property: 'Word / Phrase', title: { equals: data.word } },
+              { property: 'Article', relation: { contains: articlePageId } }
+            ]
+          }
+        })
+      });
+      const dupData = await dupRes.json();
+      if (dupData.results?.length > 0) {
+        return { success: false, duplicate: true };
+      }
+    } catch (e) {
+      console.error('[EL] Duplicate check failed:', e);
     }
   }
 
