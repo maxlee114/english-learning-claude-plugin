@@ -68,7 +68,7 @@ Claude fetches words from Notion, confirms the list, then writes a 150–250 wor
 
 ## Chrome Extension
 
-Select text on any webpage to translate and save words directly to your Notion database.
+Select text on any webpage to translate and save words directly to your Notion database, linked to the article you're reading.
 
 ### Install
 
@@ -78,24 +78,24 @@ Select text on any webpage to translate and save words directly to your Notion d
 
 ### Setup
 
-Click the extension icon → ⚙️ → fill in your credentials, then scroll down to **Setup Notion**:
+Click the extension icon → ⚙️ to open Settings and fill in:
 
 | Field | Where to get it |
 |---|---|
 | OpenAI API Key | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
 | OpenAI Model | Default: `gpt-4o-mini` |
 | Notion Integration Token | From step 1 above (`secret_xxx...`) |
-| Parent Page URL | The page URL from step 2 above |
 
-Click **Setup Notion Databases** — the extension will automatically create the Words and Articles databases and fill in the DB IDs.
+Then scroll down to **Setup Notion**, enter the Parent Page URL from step 2, and click **Setup Notion Databases**. The extension will automatically create the Words and Articles databases and fill in the DB IDs.
 
-**Already have existing databases?** You can skip Setup and paste the DB URLs or IDs directly into the Words DB ID and Articles DB ID fields.
+**Already have existing databases?** Skip Setup and paste the DB URLs or IDs directly into the Words DB ID and Articles DB ID fields.
 
 ### Usage
 
 1. Select any word or phrase on a webpage
 2. Click the **Translate** button that appears
-3. Review the translation popup — shows word, part of speech, definition, example, and Chinese translation
-4. Click **Save to Notion** to save to your Words DB (automatically linked to the current page)
+3. Review the popup — shows word, part of speech, and definition. Click 👁 to reveal the Chinese translation
+4. Click **Save to Notion** to save to your Words DB, automatically linked to the current page
+   - Duplicate words from the same article are skipped automatically
 
-Click the extension icon to open the **Side Panel** and see all words saved from the current page.
+Click the extension icon to open the **Side Panel** and browse all words saved from the current page. Use **A⁻ / A⁺** in the side panel header to adjust font size, or change it in Settings.
