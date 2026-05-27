@@ -1,4 +1,4 @@
-const SIZES = ['small', 'medium', 'large'];
+const SIZES = ['tiny', 'small', 'medium', 'large', 'huge'];
 
 function applyFontSize(size) {
   document.body.className = `font-${size}`;
