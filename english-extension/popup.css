@@ -17,19 +17,41 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+.el-word-row {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
 .el-word {
   font-size: 18px;
   font-weight: 700;
   color: #ffffff;
   letter-spacing: -0.3px;
-  margin-bottom: 4px;
+}
+
+.el-pos {
+  font-size: 12px;
+  color: #555555;
+  font-style: italic;
 }
 
 .el-chinese {
   font-size: 13px;
   color: #888888;
-  margin-bottom: 8px;
 }
+
+.el-chinese-hint {
+  color: #444444;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.el-chinese-hint:hover { color: #aaaaaa; }
 
 .el-type-badge {
   display: inline-block;

@@ -145,7 +145,18 @@
     .word-chinese {
       font-size: var(--font-chinese);
       color: #666666;
+      cursor: pointer;
     }
+
+    .word-chinese-hint {
+      color: #444444;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      transition: color 0.15s;
+    }
+
+    .word-chinese-hint:hover { color: #aaaaaa; }
 
     .empty-state {
       padding: 48px 20px;
