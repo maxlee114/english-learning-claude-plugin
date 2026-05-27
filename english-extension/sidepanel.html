@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>English Learning Helper</title>
+  <style>
+    :root {
+      --font-word: 16px;
+      --font-pos: 12px;
+      --font-def: 14px;
+      --font-chinese: 13px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-width: 280px;
+      background: #111111;
+      color: #e0e0e0;
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    /* Font size variants */
+    body.font-small {
+      --font-word: 13px;
+      --font-pos: 10px;
+      --font-def: 12px;
+      --font-chinese: 11px;
+    }
+    body.font-medium {
+      --font-word: 16px;
+      --font-pos: 12px;
+      --font-def: 14px;
+      --font-chinese: 13px;
+    }
+    body.font-large {
+      --font-word: 20px;
+      --font-pos: 14px;
+      --font-def: 17px;
+      --font-chinese: 15px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid #2a2a2a;
+      position: sticky;
+      top: 0;
+      background: #111111;
+      z-index: 10;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo { font-size: 18px; }
+
+    .header h1 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #555555;
+      font-size: 16px;
+      padding: 4px 6px;
+      border-radius: 6px;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+
+    .icon-btn:hover { color: #aaaaaa; }
+
+    .page-info {
+      padding: 10px 16px;
+      background: #1a1a1a;
+      border-bottom: 1px solid #2a2a2a;
+      font-size: 11px;
+      color: #555555;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .word-count {
+      padding: 8px 16px;
+      font-size: 10px;
+      color: #444444;
+      border-bottom: 1px solid #2a2a2a;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .word-list { overflow-y: auto; }
+
+    .word-item {
+      padding: 14px 16px;
+      border-bottom: 1px solid #1e1e1e;
+    }
+
+    .word-item:last-child { border-bottom: none; }
+
+    .word-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .word-text {
+      font-size: var(--font-word);
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .word-pos {
+      font-size: var(--font-pos);
+      color: #555555;
+      font-style: italic;
+    }
+
+    .word-definition {
+      font-size: var(--font-def);
+      color: #888888;
+      line-height: 1.5;
+      margin-bottom: 3px;
+    }
+
+    .word-chinese {
+      font-size: var(--font-chinese);
+      color: #666666;
+    }
+
+    .empty-state {
+      padding: 48px 20px;
+      text-align: center;
+      color: #444444;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .loading {
+      padding: 48px 20px;
+      text-align: center;
+      color: #444444;
+      font-size: 13px;
+    }
+
+    .refresh-btn {
+      display: block;
+      margin: 12px auto 0;
+      background: #1e1e1e;
+      border: 1px solid #2a2a2a;
+      color: #666666;
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .refresh-btn:hover { color: #aaaaaa; border-color: #444444; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <span class="logo">📚</span>
+      <h1>English Learning</h1>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="fontSmallBtn" title="Small text">A<sup style="font-size:7px">−</sup></button>
+      <button class="icon-btn" id="fontLargeBtn" title="Large text">A<sup style="font-size:9px">+</sup></button>
+      <button class="icon-btn" id="refreshBtn" title="Refresh">↻</button>
+      <button class="icon-btn" id="settingsBtn" title="Settings">⚙️</button>
+    </div>
+  </div>
+
+  <div class="page-info" id="pageInfo">Loading...</div>
+
+  <div id="content">
+    <div class="loading">Loading words...</div>
+  </div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>

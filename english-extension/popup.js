@@ -1,5 +1,5 @@
 document.getElementById('settingsBtn').addEventListener('click', () => {
-  chrome.tabs.create({ url: chrome.runtime.getURL('settings.html') });
+  chrome.windows.create({ url: chrome.runtime.getURL('settings.html'), type: 'popup', width: 360, height: 620 });
 });
 
 async function init() {

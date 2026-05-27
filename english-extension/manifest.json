@@ -6,7 +6,8 @@
   "permissions": [
     "storage",
     "activeTab",
-    "scripting"
+    "scripting",
+    "sidePanel"
   ],
   "host_permissions": [
     "https://api.openai.com/*",
@@ -22,7 +23,8 @@
       "css": ["popup.css"]
     }
   ],
-  "action": {
-    "default_popup": "popup.html"
-  }
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "action": {}
 }

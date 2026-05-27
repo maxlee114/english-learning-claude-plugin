@@ -3,16 +3,18 @@ const openaiModelSelect = document.getElementById('openaiModel');
 const notionKeyInput = document.getElementById('notionKey');
 const notionDbIdInput = document.getElementById('notionDbId');
 const notionArticlesDbIdInput = document.getElementById('notionArticlesDbId');
+const fontSizeSelect = document.getElementById('fontSize');
 const saveBtn = document.getElementById('saveBtn');
 const status = document.getElementById('status');
 
 // Load saved settings
-chrome.storage.sync.get(['openaiKey', 'openaiModel', 'notionKey', 'notionDbId', 'notionArticlesDbId'], (data) => {
+chrome.storage.sync.get(['openaiKey', 'openaiModel', 'notionKey', 'notionDbId', 'notionArticlesDbId', 'fontSize'], (data) => {
   if (data.openaiKey) openaiKeyInput.value = data.openaiKey;
   if (data.openaiModel) openaiModelSelect.value = data.openaiModel;
   if (data.notionKey) notionKeyInput.value = data.notionKey;
   if (data.notionDbId) notionDbIdInput.value = data.notionDbId;
   if (data.notionArticlesDbId) notionArticlesDbIdInput.value = data.notionArticlesDbId;
+  if (data.fontSize) fontSizeSelect.value = data.fontSize;
 });
 
 function extractNotionId(input) {
@@ -26,8 +28,9 @@ saveBtn.addEventListener('click', () => {
   const notionKey = notionKeyInput.value.trim();
   const notionDbId = extractNotionId(notionDbIdInput.value.trim());
   const notionArticlesDbId = extractNotionId(notionArticlesDbIdInput.value.trim());
+  const fontSize = fontSizeSelect.value;
 
-  chrome.storage.sync.set({ openaiKey, openaiModel, notionKey, notionDbId, notionArticlesDbId }, () => {
+  chrome.storage.sync.set({ openaiKey, openaiModel, notionKey, notionDbId, notionArticlesDbId, fontSize }, () => {
     status.textContent = '✓ Settings saved!';
     setTimeout(() => status.textContent = '', 2000);
   });
