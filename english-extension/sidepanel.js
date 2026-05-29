@@ -130,7 +130,7 @@ async function loadWords() {
               <span class="word-chinese" id="chinese-${i}" style="display:none">${w.chinese}</span>
             ` : ''}
             <button class="word-delete" data-id="${w.id}" title="Delete">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
             </button>
           </div>
           ${w.definition ? `<div class="word-definition">${w.definition}</div>` : ''}
