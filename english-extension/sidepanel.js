@@ -121,31 +121,42 @@ async function loadWords() {
             }
           });
 
+          // Collect all occurrences
           const lowerWord = word.toLowerCase();
+          const ranges = [];
           while (walker.nextNode()) {
             const node = walker.currentNode;
-            const idx = node.textContent.toLowerCase().indexOf(lowerWord);
-            if (idx === -1) continue;
-
-            const range = document.createRange();
-            range.setStart(node, idx);
-            range.setEnd(node, idx + word.length);
-
-            const rect = range.getBoundingClientRect();
-            window.scrollTo({ top: window.scrollY + rect.top - window.innerHeight / 3, behavior: 'smooth' });
-
-            try {
-              const mark = document.createElement('mark');
-              mark.id = 'el-word-highlight';
-              mark.style.cssText = 'all: unset; background: #ffeb3b; border-radius: 3px; padding: 1px 2px; transition: background 1.5s ease;';
-              range.surroundContents(mark);
-              setTimeout(() => {
-                mark.style.background = 'transparent';
-                setTimeout(() => mark.replaceWith(...mark.childNodes), 1500);
-              }, 1500);
-            } catch (e) {}
-            break;
+            let start = 0;
+            const text = node.textContent.toLowerCase();
+            let idx;
+            while ((idx = text.indexOf(lowerWord, start)) !== -1) {
+              const range = document.createRange();
+              range.setStart(node, idx);
+              range.setEnd(node, idx + word.length);
+              ranges.push(range);
+              start = idx + 1;
+            }
           }
+          if (ranges.length === 0) return;
+
+          // Find the next occurrence after current scroll position
+          const scrollMid = window.scrollY + window.innerHeight / 3;
+          let target = ranges.find(r => window.scrollY + r.getBoundingClientRect().top > scrollMid);
+          if (!target) target = ranges[0]; // wrap around
+
+          const rect = target.getBoundingClientRect();
+          window.scrollTo({ top: window.scrollY + rect.top - window.innerHeight / 3, behavior: 'smooth' });
+
+          try {
+            const mark = document.createElement('mark');
+            mark.id = 'el-word-highlight';
+            mark.style.cssText = 'all: unset; background: #ffeb3b; border-radius: 3px; padding: 1px 2px; transition: background 1.5s ease;';
+            target.surroundContents(mark);
+            setTimeout(() => {
+              mark.style.background = 'transparent';
+              setTimeout(() => mark.replaceWith(...mark.childNodes), 1500);
+            }, 1500);
+          } catch (e) {}
         },
         args: [word]
       });
