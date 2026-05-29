@@ -62,7 +62,7 @@ async function handleTranslate(text) {
 {
   "word": "the word/phrase",
   "pos": "noun" or "verb" or "adjective" or "adverb" or "phrase" or "idiom",
-  "definition": "clear, simple definition in English (keep it brief)",
+  "definition": "short definition using only simple, common English words (A1-B1 level, avoid complex vocabulary)",
   "example": "a natural example sentence using the word",
   "chinese": "Traditional Chinese translation"
 }
