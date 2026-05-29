@@ -1,5 +1,6 @@
 const SIZES = ['tiny', 'small', 'medium', 'large', 'huge'];
 let currentTabId = null;
+let currentFilter = 'all';
 
 function applyFontSize(size) {
   document.body.className = `font-${size}`;
@@ -48,6 +49,24 @@ chrome.runtime.onMessage.addListener((message) => {
   if (message.action === 'wordSaved') loadWords();
 });
 
+function applyFilter(words) {
+  const items = document.querySelectorAll('.word-item');
+  items.forEach(item => {
+    const id = item.dataset.id;
+    const word = words.find(w => w.id === id);
+    if (!word) return;
+    item.style.display = (currentFilter === 'all' || word.familiarity === currentFilter) ? '' : 'none';
+  });
+
+  const visibleCount = [...items].filter(i => i.style.display !== 'none').length;
+  const countEl = document.querySelector('.word-count');
+  if (countEl) {
+    countEl.textContent = currentFilter === 'all'
+      ? `${words.length} word${words.length !== 1 ? 's' : ''} saved`
+      : `${visibleCount} of ${words.length} word${words.length !== 1 ? 's' : ''} — ${currentFilter}`;
+  }
+}
+
 async function loadWords() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   currentTabId = tab?.id || null;
@@ -75,6 +94,7 @@ async function loadWords() {
   }
 
   if (words.length === 0) {
+    document.getElementById('filterBar').style.display = 'none';
     content.innerHTML = `
       <div class="empty-state">
         No words saved from this page yet.<br>
@@ -82,6 +102,18 @@ async function loadWords() {
       </div>`;
     return;
   }
+
+  // Show filter bar and wire up buttons
+  const filterBar = document.getElementById('filterBar');
+  filterBar.style.display = 'flex';
+  filterBar.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('filter-active', btn.dataset.fam === currentFilter);
+    btn.onclick = () => {
+      currentFilter = btn.dataset.fam;
+      filterBar.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('filter-active', b.dataset.fam === currentFilter));
+      applyFilter(words);
+    };
+  });
 
   content.innerHTML = `
     <div class="word-count">${words.length} word${words.length > 1 ? 's' : ''} saved</div>
@@ -103,6 +135,7 @@ async function loadWords() {
           </div>
           ${w.definition ? `<div class="word-definition">${w.definition}</div>` : ''}
           <div class="word-fam-row">
+            <span class="fam-label">familiarity</span>
             ${['low','medium','high'].map(f => `
               <span class="fam-btn fam-${f} ${w.familiarity === f ? 'fam-active' : ''}" data-id="${w.id}" data-val="${f}">${f}</span>
             `).join('')}
@@ -179,13 +212,17 @@ async function loadWords() {
     });
   });
 
+  applyFilter(words);
+
   content.querySelectorAll('.fam-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const id = btn.dataset.id;
       const val = btn.dataset.val;
-      // Optimistic UI update
       btn.closest('.word-fam-row').querySelectorAll('.fam-btn').forEach(b => b.classList.remove('fam-active'));
       btn.classList.add('fam-active');
+      const word = words.find(w => w.id === id);
+      if (word) word.familiarity = val;
+      applyFilter(words);
       await chrome.runtime.sendMessage({ action: 'updateFamiliarity', id, familiarity: val });
     });
   });

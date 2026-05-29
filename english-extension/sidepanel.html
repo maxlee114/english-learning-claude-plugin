@@ -119,6 +119,39 @@
       letter-spacing: 0.8px;
     }
 
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+
+    .filter-label {
+      font-size: 10px;
+      color: #444444;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-right: 2px;
+    }
+
+    .filter-btn {
+      font-size: 10px;
+      padding: 2px 9px;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 1px solid #2a2a2a;
+      color: #555555;
+      background: none;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .filter-btn:hover { color: #aaaaaa; border-color: #444444; }
+    .filter-btn.filter-active { color: #ffffff; border-color: #555555; }
+    .filter-btn.filter-active.fam-low    { color: #e05555; border-color: #e05555; }
+    .filter-btn.filter-active.fam-medium { color: #d4a017; border-color: #d4a017; }
+    .filter-btn.filter-active.fam-high   { color: #4caf50; border-color: #4caf50; }
+
     .word-list { overflow-y: auto; }
 
     .word-item {
@@ -206,8 +239,18 @@
 
     .word-fam-row {
       display: flex;
+      align-items: center;
+      justify-content: flex-end;
       gap: 5px;
       margin-top: 7px;
+    }
+
+    .fam-label {
+      font-size: 10px;
+      color: #333333;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-right: 2px;
     }
 
     .fam-btn {
@@ -258,6 +301,14 @@
   </div>
 
   <div class="page-info" id="pageInfo">Loading...</div>
+
+  <div class="filter-bar" id="filterBar" style="display:none">
+    <span class="filter-label">filter</span>
+    <button class="filter-btn filter-active" data-fam="all">All</button>
+    <button class="filter-btn fam-low" data-fam="low">low</button>
+    <button class="filter-btn fam-medium" data-fam="medium">medium</button>
+    <button class="filter-btn fam-high" data-fam="high">high</button>
+  </div>
 
   <div id="content">
     <div class="loading">Loading words...</div>
