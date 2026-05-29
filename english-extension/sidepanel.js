@@ -103,7 +103,52 @@ async function loadWords() {
   content.querySelectorAll('.word-text').forEach(el => {
     el.addEventListener('click', () => {
       if (!currentTabId) return;
-      chrome.tabs.sendMessage(currentTabId, { action: 'scrollToWord', word: el.dataset.word });
+      const word = el.dataset.word;
+      chrome.scripting.executeScript({
+        target: { tabId: currentTabId },
+        func: (word) => {
+          const existing = document.getElementById('el-word-highlight');
+          if (existing) existing.replaceWith(...existing.childNodes);
+
+          const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+            acceptNode(node) {
+              const parent = node.parentElement;
+              if (!parent) return NodeFilter.FILTER_REJECT;
+              const tag = parent.tagName;
+              if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT') return NodeFilter.FILTER_REJECT;
+              if (parent.closest('#el-popup, #el-trigger')) return NodeFilter.FILTER_REJECT;
+              return NodeFilter.FILTER_ACCEPT;
+            }
+          });
+
+          const lowerWord = word.toLowerCase();
+          while (walker.nextNode()) {
+            const node = walker.currentNode;
+            const idx = node.textContent.toLowerCase().indexOf(lowerWord);
+            if (idx === -1) continue;
+
+            const range = document.createRange();
+            range.setStart(node, idx);
+            range.setEnd(node, idx + word.length);
+
+            const rect = range.getBoundingClientRect();
+            window.scrollTo({ top: window.scrollY + rect.top - window.innerHeight / 3, behavior: 'smooth' });
+
+            try {
+              const mark = document.createElement('mark');
+              mark.id = 'el-word-highlight';
+              mark.style.cssText = 'all: unset; background: #ffeb3b; border-radius: 3px; padding: 1px 2px; transition: background 1.5s ease;';
+              range.surroundContents(mark);
+              setTimeout(() => {
+                mark.style.background = 'transparent';
+                setTimeout(() => mark.replaceWith(...mark.childNodes), 1500);
+              }, 1500);
+            } catch (e) {}
+            break;
+          }
+        },
+        args: [word]
+      });
     });
   });
 
