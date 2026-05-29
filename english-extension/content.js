@@ -128,6 +128,7 @@ function updatePopup(data) {
       if (res.success) {
         btn.innerHTML = '✓ Saved!';
         btn.classList.add('el-saved');
+        chrome.runtime.sendMessage({ action: 'wordSaved' }).catch(() => {});
         setTimeout(removePopup, 1200);
       } else if (res.duplicate) {
         btn.textContent = '已存在';

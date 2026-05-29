@@ -44,6 +44,10 @@ document.getElementById('refreshBtn').addEventListener('click', () => {
   loadWords();
 });
 
+chrome.runtime.onMessage.addListener((message) => {
+  if (message.action === 'wordSaved') loadWords();
+});
+
 async function loadWords() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   currentTabId = tab?.id || null;
@@ -83,7 +87,7 @@ async function loadWords() {
     <div class="word-count">${words.length} word${words.length > 1 ? 's' : ''} saved</div>
     <div class="word-list">
       ${words.map((w, i) => `
-        <div class="word-item">
+        <div class="word-item" data-id="${w.id}">
           <div class="word-row">
             <span class="word-text" data-word="${w.word}" title="Click to find on page">${w.word}</span>
             ${w.pos ? `<span class="word-pos">${w.pos}</span>` : ''}
@@ -93,8 +97,16 @@ async function loadWords() {
               </span>
               <span class="word-chinese" id="chinese-${i}" style="display:none">${w.chinese}</span>
             ` : ''}
+            <button class="word-delete" data-id="${w.id}" title="Delete">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
           </div>
           ${w.definition ? `<div class="word-definition">${w.definition}</div>` : ''}
+          <div class="word-fam-row">
+            ${['low','medium','high'].map(f => `
+              <span class="fam-btn fam-${f} ${w.familiarity === f ? 'fam-active' : ''}" data-id="${w.id}" data-val="${f}">${f}</span>
+            `).join('')}
+          </div>
         </div>
       `).join('')}
     </div>
@@ -139,10 +151,14 @@ async function loadWords() {
           }
           if (ranges.length === 0) return;
 
-          // Find the next occurrence after current scroll position
-          const scrollMid = window.scrollY + window.innerHeight / 3;
-          let target = ranges.find(r => window.scrollY + r.getBoundingClientRect().top > scrollMid);
-          if (!target) target = ranges[0]; // wrap around
+          // Cycle through occurrences using persistent state on window
+          let idx = 0;
+          if (window.__elLastWord === word && typeof window.__elLastIdx === 'number') {
+            idx = (window.__elLastIdx + 1) % ranges.length;
+          }
+          window.__elLastWord = word;
+          window.__elLastIdx = idx;
+          const target = ranges[idx];
 
           const rect = target.getBoundingClientRect();
           window.scrollTo({ top: window.scrollY + rect.top - window.innerHeight / 3, behavior: 'smooth' });
@@ -160,6 +176,37 @@ async function loadWords() {
         },
         args: [word]
       });
+    });
+  });
+
+  content.querySelectorAll('.fam-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      const val = btn.dataset.val;
+      // Optimistic UI update
+      btn.closest('.word-fam-row').querySelectorAll('.fam-btn').forEach(b => b.classList.remove('fam-active'));
+      btn.classList.add('fam-active');
+      await chrome.runtime.sendMessage({ action: 'updateFamiliarity', id, familiarity: val });
+    });
+  });
+
+  content.querySelectorAll('.word-delete').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      const item = btn.closest('.word-item');
+      item.style.opacity = '0.4';
+      const res = await chrome.runtime.sendMessage({ action: 'deleteWord', id });
+      if (res.success) {
+        item.remove();
+        const remaining = content.querySelectorAll('.word-item').length;
+        const countEl = content.querySelector('.word-count');
+        if (countEl) countEl.textContent = `${remaining} word${remaining !== 1 ? 's' : ''} saved`;
+        if (remaining === 0) {
+          content.innerHTML = `<div class="empty-state">No words saved from this page yet.<br>Select any text to translate and save.</div>`;
+        }
+      } else {
+        item.style.opacity = '1';
+      }
     });
   });
 

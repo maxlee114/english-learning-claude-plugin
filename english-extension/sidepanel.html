@@ -203,6 +203,44 @@
     }
 
     .refresh-btn:hover { color: #aaaaaa; border-color: #444444; }
+
+    .word-fam-row {
+      display: flex;
+      gap: 5px;
+      margin-top: 7px;
+    }
+
+    .fam-btn {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      color: #444444;
+      background: #1a1a1a;
+      transition: color 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+
+    .fam-btn:hover { color: #888888; }
+    .fam-low.fam-active   { color: #e05555; border-color: #e05555; }
+    .fam-medium.fam-active { color: #d4a017; border-color: #d4a017; }
+    .fam-high.fam-active  { color: #4caf50; border-color: #4caf50; }
+
+    .word-delete {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: #333333;
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      transition: color 0.15s;
+    }
+
+    .word-delete:hover { color: #e05555; }
   </style>
 </head>
 <body>

@@ -33,6 +33,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     runMigrations().then(() => sendResponse({ success: true })).catch(e => sendResponse({ success: false, error: e.message }));
     return true;
   }
+  if (message.action === 'updateFamiliarity') {
+    handleUpdateFamiliarity(message.id, message.familiarity).then(sendResponse);
+    return true;
+  }
+  if (message.action === 'deleteWord') {
+    handleDeleteWord(message.id).then(sendResponse);
+    return true;
+  }
   if (message.action === 'getMigrationLogs') {
     chrome.storage.local.get(['migrationLogs'], ({ migrationLogs = [] }) => {
       sendResponse(migrationLogs);
@@ -216,14 +224,46 @@ async function handleGetPageWords(pageUrl) {
     const wordsData = await wordsRes.json();
 
     const words = wordsData.results.map(page => ({
+      id: page.id,
       word: page.properties['Word / Phrase']?.title?.[0]?.plain_text || '',
       pos: page.properties['Part of Speech']?.select?.name || '',
       definition: page.properties['Definition']?.rich_text?.[0]?.plain_text || '',
-      chinese: page.properties['Chinese']?.rich_text?.[0]?.plain_text || ''
+      chinese: page.properties['Chinese']?.rich_text?.[0]?.plain_text || '',
+      familiarity: page.properties['Familiarity']?.select?.name || 'low'
     }));
 
     return { words };
   } catch (e) {
     return { words: [], error: e.message };
+  }
+}
+
+async function handleUpdateFamiliarity(pageId, familiarity) {
+  const { notionKey } = await chrome.storage.sync.get(['notionKey']);
+  if (!notionKey) return { success: false };
+  try {
+    const res = await fetch(`https://api.notion.com/v1/pages/${pageId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${notionKey}`, 'Notion-Version': '2022-06-28' },
+      body: JSON.stringify({ properties: { 'Familiarity': { select: { name: familiarity } } } })
+    });
+    return { success: res.ok };
+  } catch (e) {
+    return { success: false };
+  }
+}
+
+async function handleDeleteWord(pageId) {
+  const { notionKey } = await chrome.storage.sync.get(['notionKey']);
+  if (!notionKey) return { success: false };
+  try {
+    const res = await fetch(`https://api.notion.com/v1/pages/${pageId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${notionKey}`, 'Notion-Version': '2022-06-28' },
+      body: JSON.stringify({ archived: true })
+    });
+    return { success: res.ok };
+  } catch (e) {
+    return { success: false };
   }
 }
