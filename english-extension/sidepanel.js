@@ -135,7 +135,6 @@ async function loadWords() {
           </div>
           ${w.definition ? `<div class="word-definition">${w.definition}</div>` : ''}
           <div class="word-fam-row">
-            <span class="fam-label">familiarity</span>
             ${['low','medium','high'].map(f => `
               <span class="fam-btn fam-${f} ${w.familiarity === f ? 'fam-active' : ''}" data-id="${w.id}" data-val="${f}">${f}</span>
             `).join('')}
