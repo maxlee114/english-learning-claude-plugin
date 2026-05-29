@@ -152,7 +152,11 @@ async function loadWords() {
         target: { tabId: currentTabId },
         func: (word) => {
           const existing = document.getElementById('el-word-highlight');
-          if (existing) existing.replaceWith(...existing.childNodes);
+          if (existing) {
+            const parent = existing.parentNode;
+            existing.replaceWith(...existing.childNodes);
+            parent?.normalize();
+          }
 
           const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
             acceptNode(node) {
