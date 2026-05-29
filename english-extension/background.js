@@ -217,11 +217,12 @@ async function handleGetPageWords(pageUrl) {
       method: 'POST',
       headers,
       body: JSON.stringify({
-        filter: { property: 'Article', relation: { contains: articleId } },
-        sorts: [{ timestamp: 'created_time', direction: 'ascending' }]
+        filter: { property: 'Article', relation: { contains: articleId } }
       })
     });
     const wordsData = await wordsRes.json();
+
+    wordsData.results.sort((a, b) => new Date(a.created_time) - new Date(b.created_time));
 
     const words = wordsData.results.map(page => ({
       id: page.id,
