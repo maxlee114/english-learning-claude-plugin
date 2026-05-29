@@ -1,4 +1,5 @@
 const SIZES = ['tiny', 'small', 'medium', 'large', 'huge'];
+let currentTabId = null;
 
 function applyFontSize(size) {
   document.body.className = `font-${size}`;
@@ -45,6 +46,7 @@ document.getElementById('refreshBtn').addEventListener('click', () => {
 
 async function loadWords() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  currentTabId = tab?.id || null;
   const pageUrl = tab?.url || '';
   const pageTitle = tab?.title || pageUrl;
 
@@ -83,7 +85,7 @@ async function loadWords() {
       ${words.map((w, i) => `
         <div class="word-item">
           <div class="word-row">
-            <span class="word-text">${w.word}</span>
+            <span class="word-text" data-word="${w.word}" title="Click to find on page">${w.word}</span>
             ${w.pos ? `<span class="word-pos">${w.pos}</span>` : ''}
             ${w.chinese ? `
               <span class="word-chinese-hint" data-idx="${i}" title="Show Chinese">
@@ -97,6 +99,13 @@ async function loadWords() {
       `).join('')}
     </div>
   `;
+
+  content.querySelectorAll('.word-text').forEach(el => {
+    el.addEventListener('click', () => {
+      if (!currentTabId) return;
+      chrome.tabs.sendMessage(currentTabId, { action: 'scrollToWord', word: el.dataset.word });
+    });
+  });
 
   content.querySelectorAll('.word-chinese-hint').forEach(hint => {
     const idx = hint.dataset.idx;

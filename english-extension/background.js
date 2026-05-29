@@ -208,7 +208,10 @@ async function handleGetPageWords(pageUrl) {
     const wordsRes = await fetch(`https://api.notion.com/v1/databases/${notionDbId}/query`, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ filter: { property: 'Article', relation: { contains: articleId } } })
+      body: JSON.stringify({
+        filter: { property: 'Article', relation: { contains: articleId } },
+        sorts: [{ timestamp: 'created_time', direction: 'ascending' }]
+      })
     });
     const wordsData = await wordsRes.json();
 
