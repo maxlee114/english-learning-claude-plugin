@@ -1,6 +1,7 @@
 const SIZES = ['tiny', 'small', 'medium', 'large', 'huge'];
 let currentTabId = null;
 let currentFilter = 'all';
+let currentSort = 'oldest'; // 'oldest' | 'newest'
 
 function applyFontSize(size) {
   document.body.className = `font-${size}`;
@@ -15,9 +16,10 @@ function currentSize() {
   return SIZES.find(s => document.body.classList.contains(`font-${s}`)) || 'medium';
 }
 
-// Apply saved font size on load
-chrome.storage.sync.get(['fontSize'], ({ fontSize }) => {
+// Apply saved font size and sort on load
+chrome.storage.sync.get(['fontSize', 'sortOrder'], ({ fontSize, sortOrder }) => {
   applyFontSize(fontSize || 'medium');
+  currentSort = sortOrder || 'oldest';
 });
 
 // Listen for font size changes from settings page
@@ -111,14 +113,29 @@ async function loadWords() {
     btn.onclick = () => {
       currentFilter = btn.dataset.fam;
       filterBar.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('filter-active', b.dataset.fam === currentFilter));
-      applyFilter(words);
+      applyFilter(sortedWords);
     };
   });
 
+  // Wire up sort toggle button
+  const sortBtn = document.getElementById('sortToggleBtn');
+  if (sortBtn) {
+    sortBtn.classList.toggle('sort-asc', currentSort === 'oldest');
+    sortBtn.title = currentSort === 'oldest' ? 'Oldest first' : 'Newest first';
+    sortBtn.onclick = () => {
+      currentSort = currentSort === 'oldest' ? 'newest' : 'oldest';
+      chrome.storage.sync.set({ sortOrder: currentSort });
+      loadWords();
+    };
+  }
+
+  // Apply sort
+  const sortedWords = currentSort === 'oldest' ? [...words].reverse() : [...words];
+
   content.innerHTML = `
-    <div class="word-count">${words.length} word${words.length > 1 ? 's' : ''} saved</div>
+    <div class="word-count">${sortedWords.length} word${sortedWords.length > 1 ? 's' : ''} saved</div>
     <div class="word-list">
-      ${words.map((w, i) => `
+      ${sortedWords.map((w, i) => `
         <div class="word-item" data-id="${w.id}">
           <div class="word-row">
             <span class="word-text" data-word="${w.word}" title="Click to find on page">${w.word}</span>
@@ -215,7 +232,7 @@ async function loadWords() {
     });
   });
 
-  applyFilter(words);
+  applyFilter(sortedWords);
 
   content.querySelectorAll('.fam-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
@@ -223,9 +240,9 @@ async function loadWords() {
       const val = btn.dataset.val;
       btn.closest('.word-fam-row').querySelectorAll('.fam-btn').forEach(b => b.classList.remove('fam-active'));
       btn.classList.add('fam-active');
-      const word = words.find(w => w.id === id);
+      const word = sortedWords.find(w => w.id === id);
       if (word) word.familiarity = val;
-      applyFilter(words);
+      applyFilter(sortedWords);
       await chrome.runtime.sendMessage({ action: 'updateFamiliarity', id, familiarity: val });
     });
   });
