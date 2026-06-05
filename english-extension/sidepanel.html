@@ -284,6 +284,13 @@
     }
 
     .word-delete:hover { color: #e05555; }
+
+    .sort-toggle-btn {
+      margin-left: auto;
+      font-size: 15px;
+    }
+
+    .sort-toggle-btn.sort-asc { color: #aaaaaa; }
   </style>
 </head>
 <body>
@@ -308,6 +315,7 @@
     <button class="filter-btn fam-low" data-fam="low">low</button>
     <button class="filter-btn fam-medium" data-fam="medium">medium</button>
     <button class="filter-btn fam-high" data-fam="high">high</button>
+    <button class="icon-btn sort-toggle-btn" id="sortToggleBtn" title="Toggle sort order">⇅</button>
   </div>
 
   <div id="content">

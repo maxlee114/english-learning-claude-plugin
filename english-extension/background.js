@@ -217,8 +217,7 @@ async function handleGetPageWords(pageUrl) {
       method: 'POST',
       headers,
       body: JSON.stringify({
-        filter: { property: 'Article', relation: { contains: articleId } },
-        sorts: [{ timestamp: 'created_time', direction: 'ascending' }]
+        filter: { property: 'Article', relation: { contains: articleId } }
       })
     });
     const wordsData = await wordsRes.json();
