@@ -222,6 +222,8 @@ async function handleGetPageWords(pageUrl) {
     });
     const wordsData = await wordsRes.json();
 
+    wordsData.results.sort((a, b) => new Date(a.created_time) - new Date(b.created_time));
+
     const words = wordsData.results.map(page => ({
       id: page.id,
       word: page.properties['Word / Phrase']?.title?.[0]?.plain_text || '',
