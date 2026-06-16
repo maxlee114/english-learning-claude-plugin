@@ -68,7 +68,7 @@ async function handleTranslate(text) {
             role: 'system',
             content: `You are an English learning assistant. When given a word or phrase, respond ONLY with valid JSON in this exact format:
 {
-  "word": "the word/phrase",
+  "word": "if pos is verb, use the base/infinitive form (e.g. 'see' for 'saw', 'look' for 'looked', 'run' for 'ran'); otherwise use the original word/phrase",
   "pos": "noun" or "verb" or "adjective" or "adverb" or "phrase" or "idiom",
   "definition": "short definition using only simple, common English words (A1-B1 level, avoid complex vocabulary)",
   "example": "a natural example sentence using the word",
@@ -229,6 +229,7 @@ async function handleGetPageWords(pageUrl) {
       word: page.properties['Word / Phrase']?.title?.[0]?.plain_text || '',
       pos: page.properties['Part of Speech']?.select?.name || '',
       definition: page.properties['Definition']?.rich_text?.[0]?.plain_text || '',
+      example: page.properties['Example']?.rich_text?.[0]?.plain_text || '',
       chinese: page.properties['Chinese']?.rich_text?.[0]?.plain_text || '',
       familiarity: page.properties['Familiarity']?.select?.name || 'low'
     }));
