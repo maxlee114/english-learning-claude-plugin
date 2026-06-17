@@ -1,4 +1,22 @@
 const SIZES = ['tiny', 'small', 'medium', 'large', 'huge'];
+
+function confirmDelete(btn, onConfirm) {
+  const original = btn.innerHTML;
+  btn.innerHTML = `<span class="del-confirm">✓</span><span class="del-cancel">✗</span>`;
+  btn.classList.add('del-pending');
+
+  btn.querySelector('.del-confirm').addEventListener('click', async (e) => {
+    e.stopPropagation();
+    btn.classList.remove('del-pending');
+    await onConfirm();
+  });
+
+  btn.querySelector('.del-cancel').addEventListener('click', (e) => {
+    e.stopPropagation();
+    btn.innerHTML = original;
+    btn.classList.remove('del-pending');
+  });
+}
 let currentTabId = null;
 let currentFilter = 'all';
 let currentSort = 'oldest'; // 'oldest' | 'newest'
@@ -47,8 +65,91 @@ document.getElementById('refreshBtn').addEventListener('click', () => {
   loadWords();
 });
 
+document.getElementById('pageDeleteBtn').addEventListener('click', () => {
+  const btn = document.getElementById('pageDeleteBtn');
+  const articleId = btn.dataset.articleId;
+  if (!articleId) return;
+  confirmDelete(btn, async () => {
+    btn.classList.remove('visible');
+    await chrome.runtime.sendMessage({ action: 'deleteArticle', articleId });
+    loadWords();
+  });
+});
+
+// Articles dropdown
+const articlesBtn = document.getElementById('articlesBtn');
+const articlesDropdown = document.getElementById('articlesDropdown');
+
+articlesBtn.addEventListener('click', async (e) => {
+  e.stopPropagation();
+  const isOpen = articlesDropdown.style.display !== 'none';
+  if (isOpen) {
+    articlesDropdown.style.display = 'none';
+    return;
+  }
+  articlesDropdown.style.display = 'block';
+  document.getElementById('articlesLoading').style.display = 'block';
+  document.getElementById('articlesList').innerHTML = '';
+
+  const { articles } = await chrome.runtime.sendMessage({ action: 'getArticles' });
+  document.getElementById('articlesLoading').style.display = 'none';
+
+  if (!articles?.length) {
+    document.getElementById('articlesList').innerHTML = '<div class="articles-loading">No articles saved yet.</div>';
+    return;
+  }
+
+  renderArticlesList(articles);
+});
+
+function renderArticlesList(articles) {
+  document.getElementById('articlesList').innerHTML = articles.map(a =>
+    `<div class="article-item" data-url="${a.url}" data-id="${a.id}" title="${a.title}">
+      <span class="article-title">${a.title}</span>
+      <button class="article-delete-btn" data-id="${a.id}" title="Delete article and words">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </button>
+    </div>`
+  ).join('');
+
+  document.getElementById('articlesList').querySelectorAll('.article-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      if (e.target.closest('.article-delete-btn')) return;
+      const url = item.dataset.url;
+      const title = item.querySelector('.article-title')?.textContent || url;
+      chrome.tabs.update({ url });
+      articlesDropdown.style.display = 'none';
+      loadWords(url, title);
+    });
+  });
+
+  document.getElementById('articlesList').querySelectorAll('.article-delete-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      confirmDelete(btn, async () => {
+        btn.textContent = '…';
+        const { success } = await chrome.runtime.sendMessage({ action: 'deleteArticle', articleId: btn.dataset.id });
+        if (success) {
+          btn.closest('.article-item').remove();
+          loadWords();
+        } else {
+          btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>`;
+        }
+      });
+    });
+  });
+}
+
+document.addEventListener('click', () => {
+  articlesDropdown.style.display = 'none';
+});
+
 chrome.runtime.onMessage.addListener((message) => {
   if (message.action === 'wordSaved') loadWords();
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+  if (tabId === currentTabId && changeInfo.status === 'complete' && changeInfo.url) loadWords();
 });
 
 function applyFilter(words) {
@@ -69,21 +170,30 @@ function applyFilter(words) {
   }
 }
 
-async function loadWords() {
+async function loadWords(overrideUrl = null, overrideTitle = null) {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   currentTabId = tab?.id || null;
-  const pageUrl = tab?.url || '';
-  const pageTitle = tab?.title || pageUrl;
+  const pageUrl = overrideUrl || tab?.url || '';
 
-  document.getElementById('pageInfo').textContent = pageTitle || pageUrl;
+  document.getElementById('pageInfoTitle').textContent = overrideTitle || tab?.title || pageUrl;
+  document.getElementById('pageDeleteBtn').classList.remove('visible');
+  document.getElementById('pageDeleteBtn').dataset.articleId = '';
 
   const content = document.getElementById('content');
   content.innerHTML = `<div class="loading">Loading words...</div>`;
 
-  const { words, error } = await chrome.runtime.sendMessage({
+  const { words, error, articleId, articleTitle } = await chrome.runtime.sendMessage({
     action: 'getPageWords',
     pageUrl
   });
+
+  if (articleId) {
+    const titleEl = document.getElementById('pageInfoTitle');
+    if (articleTitle) titleEl.textContent = articleTitle;
+    const delBtn = document.getElementById('pageDeleteBtn');
+    delBtn.dataset.articleId = articleId;
+    delBtn.classList.add('visible');
+  }
 
   if (error || !words) {
     content.innerHTML = `
@@ -249,22 +359,24 @@ async function loadWords() {
   });
 
   content.querySelectorAll('.word-delete').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = btn.dataset.id;
-      const item = btn.closest('.word-item');
-      item.style.opacity = '0.4';
-      const res = await chrome.runtime.sendMessage({ action: 'deleteWord', id });
-      if (res.success) {
-        item.remove();
-        const remaining = content.querySelectorAll('.word-item').length;
-        const countEl = content.querySelector('.word-count');
-        if (countEl) countEl.textContent = `${remaining} word${remaining !== 1 ? 's' : ''} saved`;
-        if (remaining === 0) {
-          content.innerHTML = `<div class="empty-state">No words saved from this page yet.<br>Select any text to translate and save.</div>`;
+    btn.addEventListener('click', () => {
+      confirmDelete(btn, async () => {
+        const id = btn.dataset.id;
+        const item = btn.closest('.word-item');
+        item.style.opacity = '0.4';
+        const res = await chrome.runtime.sendMessage({ action: 'deleteWord', id });
+        if (res.success) {
+          item.remove();
+          const remaining = content.querySelectorAll('.word-item').length;
+          const countEl = content.querySelector('.word-count');
+          if (countEl) countEl.textContent = `${remaining} word${remaining !== 1 ? 's' : ''} saved`;
+          if (remaining === 0) {
+            content.innerHTML = `<div class="empty-state">No words saved from this page yet.<br>Select any text to translate and save.</div>`;
+          }
+        } else {
+          item.style.opacity = '1';
         }
-      } else {
-        item.style.opacity = '1';
-      }
+      });
     });
   });
 

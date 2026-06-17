@@ -85,6 +85,80 @@
       gap: 6px;
     }
 
+    .articles-menu-wrap {
+      position: relative;
+    }
+
+    .articles-dropdown {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: #1e1e1e;
+      border: 1px solid #2e2e2e;
+      border-radius: 8px;
+      min-width: 220px;
+      max-width: 280px;
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 100;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    }
+
+    .articles-loading {
+      padding: 12px 14px;
+      color: #555;
+      font-size: 12px;
+    }
+
+    .article-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #cccccc;
+      cursor: pointer;
+      border-bottom: 1px solid #2a2a2a;
+    }
+
+    .article-item:last-child { border-bottom: none; }
+
+    .article-item:hover { background: #2a2a2a; color: #ffffff; }
+
+    .article-title {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .article-delete-btn {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #444;
+      padding: 2px 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+    }
+
+    .article-delete-btn:hover { color: #e05555; background: #2e2e2e; }
+
+    .del-pending { display: flex; gap: 4px; align-items: center; }
+    .del-confirm, .del-cancel {
+      cursor: pointer;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: 11px;
+    }
+    .del-confirm { color: #e05555; }
+    .del-confirm:hover { background: #3a1a1a; }
+    .del-cancel { color: #555; }
+    .del-cancel:hover { background: #2a2a2a; color: #aaa; }
+
     .icon-btn {
       background: none;
       border: none;
@@ -100,15 +174,37 @@
     .icon-btn:hover { color: #aaaaaa; }
 
     .page-info {
-      padding: 10px 16px;
+      padding: 8px 16px;
       background: #1a1a1a;
       border-bottom: 1px solid #2a2a2a;
       font-size: 11px;
       color: #555555;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .page-info-title {
+      flex: 1;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
+    .page-delete-btn {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #444;
+      padding: 2px 4px;
+      border-radius: 4px;
+      display: none;
+      align-items: center;
+    }
+
+    .page-delete-btn.visible { display: flex; }
+    .page-delete-btn:hover { color: #e05555; }
 
     .word-count {
       padding: 8px 16px;
@@ -313,11 +409,25 @@
       <button class="icon-btn" id="fontSmallBtn" title="Small text">A<sup style="font-size:7px">−</sup></button>
       <button class="icon-btn" id="fontLargeBtn" title="Large text">A<sup style="font-size:9px">+</sup></button>
       <button class="icon-btn" id="refreshBtn" title="Refresh">↻</button>
+      <div class="articles-menu-wrap">
+        <button class="icon-btn" id="articlesBtn" title="My articles">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h16M4 14h10"/></svg>
+        </button>
+        <div class="articles-dropdown" id="articlesDropdown" style="display:none">
+          <div class="articles-loading" id="articlesLoading">Loading...</div>
+          <div id="articlesList"></div>
+        </div>
+      </div>
       <button class="icon-btn" id="settingsBtn" title="Settings">⚙️</button>
     </div>
   </div>
 
-  <div class="page-info" id="pageInfo">Loading...</div>
+  <div class="page-info" id="pageInfo">
+    <span class="page-info-title" id="pageInfoTitle">Loading...</span>
+    <button class="page-delete-btn" id="pageDeleteBtn" title="Delete article and words">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+    </button>
+  </div>
 
   <div class="filter-bar" id="filterBar" style="display:none">
     <span class="filter-label">filter</span>

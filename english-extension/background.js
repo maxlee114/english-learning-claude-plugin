@@ -21,6 +21,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     handleGetPageWords(message.pageUrl).then(sendResponse);
     return true;
   }
+  if (message.action === 'getArticles') {
+    handleGetArticles().then(sendResponse);
+    return true;
+  }
+  if (message.action === 'deleteArticle') {
+    handleDeleteArticle(message.articleId).then(sendResponse);
+    return true;
+  }
   if (message.action === 'setup') {
     handleSetup(message.data).then(sendResponse);
     return true;
@@ -68,7 +76,7 @@ async function handleTranslate(text) {
             role: 'system',
             content: `You are an English learning assistant. When given a word or phrase, respond ONLY with valid JSON in this exact format:
 {
-  "word": "if pos is verb, use the base/infinitive form (e.g. 'see' for 'saw', 'look' for 'looked', 'run' for 'ran'); otherwise use the original word/phrase",
+  "word": "always use the base/dictionary form: verbs in infinitive and keep full phrasal verbs intact (e.g. 'engage with' for 'engages with', 'look up' for 'looked up', 'see' for 'saw'); nouns in singular (e.g. 'claim' for 'claims', 'child' for 'children'); adjectives/adverbs in base form; phrases and idioms unchanged",
   "pos": "noun" or "verb" or "adjective" or "adverb" or "phrase" or "idiom",
   "definition": "short definition using only simple, common English words (A1-B1 level, avoid complex vocabulary)",
   "example": "a natural example sentence using the word",
@@ -234,9 +242,37 @@ async function handleGetPageWords(pageUrl) {
       familiarity: page.properties['Familiarity']?.select?.name || 'low'
     }));
 
-    return { words };
+    const articleTitle = queryData.results[0].properties['Title']?.title?.[0]?.plain_text || '';
+
+    return { words, articleId, articleTitle };
   } catch (e) {
     return { words: [], error: e.message };
+  }
+}
+
+async function handleGetArticles() {
+  const { notionKey, notionArticlesDbId } = await chrome.storage.sync.get(['notionKey', 'notionArticlesDbId']);
+  if (!notionKey || !notionArticlesDbId) return { articles: [] };
+
+  try {
+    const res = await fetch(`https://api.notion.com/v1/databases/${notionArticlesDbId}/query`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${notionKey}`,
+        'Notion-Version': '2022-06-28'
+      },
+      body: JSON.stringify({ sorts: [{ timestamp: 'created_time', direction: 'descending' }] })
+    });
+    const data = await res.json();
+    const articles = (data.results || []).map(page => ({
+      id: page.id,
+      title: page.properties['Title']?.title?.[0]?.plain_text || page.properties['URL']?.url || '',
+      url: page.properties['URL']?.url || ''
+    })).filter(a => a.url);
+    return { articles };
+  } catch (e) {
+    return { articles: [], error: e.message };
   }
 }
 
@@ -252,6 +288,42 @@ async function handleUpdateFamiliarity(pageId, familiarity) {
     return { success: res.ok };
   } catch (e) {
     return { success: false };
+  }
+}
+
+async function handleDeleteArticle(articleId) {
+  const { notionKey, notionDbId } = await chrome.storage.sync.get(['notionKey', 'notionDbId']);
+  if (!notionKey || !notionDbId) return { success: false };
+
+  const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${notionKey}`, 'Notion-Version': '2022-06-28' };
+
+  try {
+    // Find all words linked to this article
+    const wordsRes = await fetch(`https://api.notion.com/v1/databases/${notionDbId}/query`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ filter: { property: 'Article', relation: { contains: articleId } } })
+    });
+    const wordsData = await wordsRes.json();
+
+    // Archive all linked words
+    await Promise.all((wordsData.results || []).map(page =>
+      fetch(`https://api.notion.com/v1/pages/${page.id}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ archived: true })
+      })
+    ));
+
+    // Archive the article itself
+    const res = await fetch(`https://api.notion.com/v1/pages/${articleId}`, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify({ archived: true })
+    });
+    return { success: res.ok };
+  } catch (e) {
+    return { success: false, error: e.message };
   }
 }
 
