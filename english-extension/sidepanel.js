@@ -130,7 +130,7 @@ async function loadWords() {
   }
 
   // Apply sort
-  const sortedWords = currentSort === 'oldest' ? [...words].reverse() : [...words];
+  const sortedWords = currentSort === 'newest' ? [...words].reverse() : [...words];
 
   content.innerHTML = `
     <div class="word-count">${sortedWords.length} word${sortedWords.length > 1 ? 's' : ''} saved</div>
@@ -151,6 +151,7 @@ async function loadWords() {
             </button>
           </div>
           ${w.definition ? `<div class="word-definition">${w.definition}</div>` : ''}
+          ${w.example ? `<div class="word-example">"${w.example}"</div>` : ''}
           <div class="word-fam-row">
             ${['low','medium','high'].map(f => `
               <span class="fam-btn fam-${f} ${w.familiarity === f ? 'fam-active' : ''}" data-id="${w.id}" data-val="${f}">${f}</span>
